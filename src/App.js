@@ -3,7 +3,7 @@ import AutomataInput from "./components/AutomataInput";
 import TransitionInput from "./components/TransitionInput";
 import StringInput from "./components/StringInput";
 import ResultDisplay from "./components/ResultDisplay";
-import FiniteAutomaton from "./FiniteAutomaton"; //importa la calse del automata
+import FiniteAutomaton from "./FiniteAutomaton"; // Importa la clase del autómata
 import "./App.css";
 
 const App = () => {
@@ -19,7 +19,8 @@ const App = () => {
 
   const handleTransitionSubmit = (transition) => {
     if (automaton) {
-      automaton.addTransition(transition.fromState, transition.symbol, transition.toState);
+      const symbol = transition.symbol.trim() === "ε" ? "ε" : transition.symbol.trim();
+      automaton.addTransition(transition.fromState, symbol, transition.toState);
     }
   };
 

@@ -1,19 +1,20 @@
 class FiniteAutomaton {
     constructor() {
         this.initial = "";
-        this.finalStates = [];
+        this.finalStates = new Set(); // Usamos Set para eficiencia
         this.transitions = {};
-        this.errorState = "-"; // Definimos un estado de error especial
+        this.errorState = "-"; // Estado de error
     }
 
     addTransition(fromState, symbol, toState) {
         this.transitions[fromState] ??= {};
-        this.transitions[fromState][symbol] ??= [];
-        this.transitions[fromState][symbol].push(toState);
+        this.transitions[fromState][symbol] ??= new Set();
+        this.transitions[fromState][symbol].add(toState);
     }
 
     /**
-     * Obtiene todos los estados alcanzables con transiciones épsilon (ε)
+     * Obtiene el cierre epsilon (ε) de un estado, es decir, todos los estados
+     * alcanzables mediante transiciones ε, incluyendo el estado inicial dado.
      */
     getEpsilonClosure(state, visited = new Set()) {
         if (visited.has(state) || state === this.errorState) return visited;
@@ -32,19 +33,18 @@ class FiniteAutomaton {
      */
     evaluateStr(str, currentStates = this.getEpsilonClosure(this.initial), currentIndex = 0) {
         if (currentIndex >= str.length) {
-            return [...currentStates].some(state => this.finalStates.includes(state));
+            return [...currentStates].some(state => this.finalStates.has(state));
         }
 
         let nextStates = new Set();
 
         for (const state of currentStates) {
-            if (state === this.errorState) continue; // Si llegamos al estado de error, lo ignoramos
+            if (state === this.errorState) continue; // Ignoramos el estado de error
 
             const possibleTransitions = this.transitions[state]?.[str[currentIndex]] || [];
             for (const nextState of possibleTransitions) {
-                if (nextState === this.errorState) return false; // Si entramos en el estado de error, detener evaluación
-                const closure = this.getEpsilonClosure(nextState);
-                closure.forEach(s => nextStates.add(s));
+                if (nextState === this.errorState) return false; // Si llegamos a un estado de error, detener evaluación
+                this.getEpsilonClosure(nextState).forEach(s => nextStates.add(s));
             }
         }
 
@@ -56,7 +56,7 @@ class FiniteAutomaton {
     }
 
     setFinalStates(states) {
-        this.finalStates = states;
+        this.finalStates = new Set(states); // Guardamos como Set para búsquedas más rápidas
     }
 }
 
